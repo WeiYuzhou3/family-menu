@@ -35,6 +35,7 @@ export default function ImportRecipePage() {
   const [error, setError] = useState("");
   const [recipes, setRecipes] = useState<RecipePreview[]>([]);
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
+  const [savedDishes, setSavedDishes] = useState<Set<number>>(new Set());
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
@@ -103,10 +104,24 @@ export default function ImportRecipePage() {
         formData.set("instructions", `📺 参考视频：${videoUrl}\n\n${recipe.instructions}`);
       }
 
-      const { createDishAction } = await import("../actions");
-      await createDishAction(formData);
+      // Use the underlying createDish directly (without redirect)
+      const { createDish } = await import("@/lib/db/dishes");
+      await createDish({
+        name: recipe.name,
+        category: recipe.category as "main" | "side" | "soup" | "breakfast" | "dessert" | "beverage",
+        description: recipe.description,
+        image_url: coverUrl || undefined,
+        ingredients: recipe.ingredients,
+        instructions: videoUrl
+          ? `📺 参考视频：${videoUrl}\n\n${recipe.instructions}`
+          : recipe.instructions,
+        cooking_time: recipe.cooking_time,
+        difficulty: recipe.difficulty as "easy" | "medium" | "hard" | undefined,
+      });
+      setSavedDishes((prev) => new Set(prev).add(index));
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存失败");
+    } finally {
       setSavingIndex(null);
     }
   }
@@ -244,15 +259,21 @@ export default function ImportRecipePage() {
 
               <button
                 onClick={() => handleSave(recipe, index)}
-                disabled={savingIndex !== null}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40"
+                disabled={savingIndex !== null || savedDishes.has(index)}
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm transition-colors disabled:opacity-40 ${
+                  savedDishes.has(index)
+                    ? "bg-success/20 text-success border border-success/30"
+                    : "bg-accent text-white hover:bg-accent-hover"
+                }`}
               >
                 {savingIndex === index ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : savedDishes.has(index) ? (
+                  <Check className="w-4 h-4" />
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
-                保存「{recipe.name}」到菜单
+                {savedDishes.has(index) ? `「${recipe.name}」已保存` : `保存「${recipe.name}」到菜单`}
               </button>
             </div>
           ))}
