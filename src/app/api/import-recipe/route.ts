@@ -21,7 +21,26 @@ function extractBilibiliId(url: string): string | null {
   // av号格式
   const avMatch = url.match(/av(\d+)/i);
   if (avMatch) return `av${avMatch[1]}`;
+  // b23.tv 短链接
+  if (/b23\.tv/i.test(url)) return "__short__";
   return null;
+}
+
+async function resolveB23ShortLink(shortUrl: string): Promise<string> {
+  const res = await fetch(shortUrl, {
+    redirect: "manual",
+    headers: { "User-Agent": "FamilyMenu/1.0" },
+  });
+
+  const location = res.headers.get("location");
+  if (location) {
+    const id = extractBilibiliId(location);
+    if (id && id !== "__short__") return id;
+    // If it redirected to another b23.tv, follow again
+    if (location.includes("b23.tv")) return resolveB23ShortLink(location);
+  }
+
+  throw new Error("无法解析B站短链接，请使用完整的 bilibili.com/video/ 链接");
 }
 
 interface BilibiliInfo {
@@ -163,8 +182,17 @@ export async function POST(request: NextRequest) {
 
     // Try B站 auto-fetch
     if (url) {
-      const bvid = extractBilibiliId(url);
-      if (bvid) {
+      let bvid = extractBilibiliId(url);
+      // Resolve b23.tv short links
+      if (bvid === "__short__") {
+        try {
+          bvid = await resolveB23ShortLink(url);
+        } catch (err) {
+          console.error("短链接解析失败:", err);
+          bvid = null;
+        }
+      }
+      if (bvid && bvid !== "__short__") {
         try {
           const biliInfo = await fetchBilibiliInfo(bvid);
           contentText = biliInfo.text + (contentText ? "\n\n用户补充:\n" + contentText : "");
