@@ -70,21 +70,35 @@ export function IngredientsEditor({
               placeholder="数量"
               className="w-16 bg-bg-surface rounded-lg px-2 py-1.5 text-sm text-text-primary text-center focus:outline-none focus:ring-1 focus:ring-accent"
             />
-            <select
+            <input
+              type="text"
+              list="unit-suggestions"
               value={ing.unit}
               onChange={(e) => updateIngredient(i, "unit", e.target.value)}
+              placeholder="单位"
               className="w-16 bg-bg-surface rounded-lg px-1 py-1.5 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent"
-            >
-              <option value="g">g</option>
-              <option value="kg">kg</option>
-              <option value="ml">ml</option>
-              <option value="L">L</option>
-              <option value="个">个</option>
-              <option value="勺">勺</option>
-              <option value="杯">杯</option>
-              <option value="片">片</option>
-              <option value="适量">适量</option>
-            </select>
+            />
+            <datalist id="unit-suggestions">
+              <option value="g" />
+              <option value="kg" />
+              <option value="ml" />
+              <option value="L" />
+              <option value="个" />
+              <option value="勺" />
+              <option value="杯" />
+              <option value="片" />
+              <option value="根" />
+              <option value="块" />
+              <option value="把" />
+              <option value="颗" />
+              <option value="条" />
+              <option value="只" />
+              <option value="瓣" />
+              <option value="段" />
+              <option value="碗" />
+              <option value="盘" />
+              <option value="适量" />
+            </datalist>
             <button
               type="button"
               onClick={() => removeIngredient(i)}
