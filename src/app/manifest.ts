@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "A premium family meal ordering experience. Browse, order, and cook with elegance.",
     start_url: "/",
     display: "standalone",
-    background_color: "#faf7f2",
-    theme_color: "#faf7f2",
+    background_color: "#fbf7f0",
+    theme_color: "#fbf7f0",
     orientation: "portrait-primary",
     icons: [
       {

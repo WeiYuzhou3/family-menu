@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 
@@ -15,8 +15,16 @@ const playfairDisplay = Playfair_Display({
   display: "swap",
 });
 
+const notoSerifSC = Noto_Serif_SC({
+  variable: "--font-serif-sc",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  preload: false,
+});
+
 export const viewport: Viewport = {
-  themeColor: "#faf7f2",
+  themeColor: "#fbf7f0",
 };
 
 export const metadata: Metadata = {
@@ -38,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${inter.variable} ${playfairDisplay.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfairDisplay.variable} ${notoSerifSC.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg-base text-text-primary font-sans">
         <ToastProvider>
