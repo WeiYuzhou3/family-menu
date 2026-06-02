@@ -4,6 +4,7 @@ import { Plus, Pencil, Eye, EyeOff, Sparkles } from "lucide-react";
 import { getAllDishes } from "@/lib/db/dishes";
 import { toggleAvailablityAction } from "./actions";
 import { DeleteButton } from "./_components/DeleteButton";
+import { WeeklySuggestions } from "./_components/WeeklySuggestions";
 import { CategoryBadge } from "@/components/ui/Badge";
 
 export default async function AdminPage() {
@@ -130,6 +131,8 @@ export default async function AdminPage() {
           ))}
         </div>
       )}
+
+      {dishes.length > 0 && <WeeklySuggestions />}
     </div>
   );
 }

@@ -3,11 +3,12 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/OrderCartContext";
 import { DateMealSelector } from "@/components/DateMealSelector";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { AIRecommendModal } from "./AIRecommendModal";
 import type { Dish, Category } from "@/lib/supabase/types";
 
 const CATEGORY_TABS: { value: Category | "all"; label: string }[] = [
@@ -27,6 +28,7 @@ interface MenuClientProps {
 export function MenuClient({ dishes }: MenuClientProps) {
   const [activeCategory, setActiveCategory] = useState<Category | "all">("all");
   const { mealDate, mealTime, setMealDate, setMealTime } = useCart();
+  const [showRecommend, setShowRecommend] = useState(false);
 
   const filteredDishes = useMemo(() => {
     if (activeCategory === "all") return dishes;
@@ -36,7 +38,7 @@ export function MenuClient({ dishes }: MenuClientProps) {
   return (
     <div>
       {/* Date & Meal Selector */}
-      <div className="mb-6">
+      <div className="mb-4">
         <DateMealSelector
           selectedDate={mealDate}
           selectedMeal={mealTime}
@@ -44,6 +46,24 @@ export function MenuClient({ dishes }: MenuClientProps) {
           onMealChange={setMealTime}
         />
       </div>
+
+      {/* AI Recommend Button */}
+      <div className="mb-4">
+        <button
+          onClick={() => setShowRecommend(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium bg-accent/5 border border-accent/20 text-accent hover:bg-accent/10 transition-colors"
+        >
+          <Sparkles className="w-4 h-4" />
+          不知道吃什么？AI 帮你搭配
+        </button>
+      </div>
+
+      <AIRecommendModal
+        open={showRecommend}
+        onClose={() => setShowRecommend(false)}
+        mealDate={mealDate}
+        mealTime={mealTime}
+      />
 
       {/* Category Filter */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
