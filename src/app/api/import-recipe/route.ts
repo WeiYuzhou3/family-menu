@@ -36,7 +36,9 @@ function extractBilibiliId(url: string): string | null {
   return null;
 }
 
-async function resolveB23ShortLink(shortUrl: string): Promise<string> {
+async function resolveB23ShortLink(input: string): Promise<string> {
+  // Ensure we have a clean URL even if called with mixed text
+  const shortUrl = extractUrl(input) || input;
   const res = await fetch(shortUrl, {
     redirect: "manual",
     headers: { "User-Agent": "FamilyMenu/1.0" },

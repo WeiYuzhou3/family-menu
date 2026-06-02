@@ -58,11 +58,15 @@ export default function ImportRecipePage() {
     setLoading(true);
 
     try {
+      // Clean URL: extract from mixed text like "【标题】 https://b23.tv/xxx"
+      const urlMatch = url.match(/(https?:\/\/\S+)/i);
+      const cleanUrl = urlMatch ? urlMatch[1] : url.trim();
+
       const res = await fetch("/api/import-recipe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url: url.trim() || undefined,
+          url: cleanUrl || undefined,
           manualText: manualText.trim() || undefined,
         }),
       });
