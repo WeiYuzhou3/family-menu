@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Get all available dishes
     const { data: dishes } = await supabase
       .from("dishes")
-      .select("id, name, category, description, cooking_time, difficulty")
+      .select("*")
       .eq("is_available", true);
 
     if (!dishes?.length) {
