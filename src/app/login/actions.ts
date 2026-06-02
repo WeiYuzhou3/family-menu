@@ -13,10 +13,10 @@ export async function loginAction(formData: FormData) {
     return { success: false, error: "请选择角色并输入密码" };
   }
 
-  const isValid = await verifyPassword(role, password);
+  const result = await verifyPassword(role, password);
 
-  if (!isValid) {
-    return { success: false, error: "密码不正确" };
+  if (!result.valid) {
+    return { success: false, error: result.error || "密码不正确" };
   }
 
   const session = await getSession();

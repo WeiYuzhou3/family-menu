@@ -6,18 +6,35 @@ import type { AppRole } from "@/lib/supabase/types";
 export async function verifyPassword(
   role: AppRole,
   password: string
-): Promise<boolean> {
-  const supabase = createServerClient();
+): Promise<{ valid: boolean; error?: string }> {
+  try {
+    const supabase = createServerClient();
 
-  const { data, error } = await supabase
-    .from("app_passwords")
-    .select("password_hash")
-    .eq("role", role)
-    .single();
+    const { data, error } = await supabase
+      .from("app_passwords")
+      .select("password_hash")
+      .eq("role", role)
+      .single();
 
-  if (error || !data) return false;
+    if (error) {
+      console.error("Supabase query error:", error.message, error.code);
+      return { valid: false, error: `数据库查询失败: ${error.message}` };
+    }
 
-  return bcrypt.compare(password, data.password_hash);
+    if (!data) {
+      return { valid: false, error: `未找到角色 ${role} 的密码记录` };
+    }
+
+    const match = await bcrypt.compare(password, data.password_hash);
+    if (!match) {
+      return { valid: false, error: "密码不正确" };
+    }
+
+    return { valid: true };
+  } catch (err) {
+    console.error("verifyPassword error:", err);
+    return { valid: false, error: `服务器内部错误: ${err instanceof Error ? err.message : "未知"}` };
+  }
 }
 
 // ── Set/update password ──
@@ -45,7 +62,7 @@ export async function setPassword(role: AppRole, password: string): Promise<void
   }
 }
 
-// ── Check if any password exists (for first-run setup detection) ──
+// ── Check if any password exists ──
 export async function hasAnyPassword(): Promise<boolean> {
   const supabase = createServerClient();
   const { count, error } = await supabase
