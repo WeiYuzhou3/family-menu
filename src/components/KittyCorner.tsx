@@ -25,7 +25,7 @@ export function KittyCorner() {
         width={70}
         height={70}
         priority
-        style={{ objectFit: "contain" }}
+        style={{ objectFit: "contain", mixBlendMode: "multiply" }}
       />
     </div>
   );
