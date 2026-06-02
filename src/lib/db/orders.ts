@@ -3,8 +3,16 @@ import type { Order, OrderItem, OrderStatus, MealTime } from "@/lib/supabase/typ
 
 // ── Extended Types ──
 
+export interface OrderItemWithDish extends OrderItem {
+  dish_name: string;
+  dish_image_url: string | null;
+  dish_ingredients: { name: string; amount: number; unit: string }[] | null;
+  dish_instructions: string | null;
+  dish_cooking_time: number | null;
+}
+
 export interface OrderWithItems extends Order {
-  items: (OrderItem & { dish_name: string; dish_image_url: string | null })[];
+  items: OrderItemWithDish[];
 }
 
 // ── Queries ──
@@ -72,16 +80,22 @@ export async function getOrdersByRole(
     orders.map(async (order) => {
       const { data: items } = await supabase
         .from("order_items")
-        .select("*, dishes(name, image_url)")
+        .select("*, dishes(name, image_url, ingredients, instructions, cooking_time)")
         .eq("order_id", order.id);
 
       return {
         ...order,
-        items: (items || []).map((item) => ({
-          ...item,
-          dish_name: (item as unknown as { dishes: { name: string; image_url: string | null } } | null)?.dishes?.name || "Unknown",
-          dish_image_url: (item as unknown as { dishes: { name: string; image_url: string | null } } | null)?.dishes?.image_url || null,
-        })),
+        items: (items || []).map((item) => {
+          const dishData = (item as unknown as { dishes: { name: string; image_url: string | null; ingredients: unknown; instructions: string | null; cooking_time: number | null } | null })?.dishes;
+          return {
+            ...item,
+            dish_name: dishData?.name || "Unknown",
+            dish_image_url: dishData?.image_url || null,
+            dish_ingredients: (dishData?.ingredients as { name: string; amount: number; unit: string }[]) || null,
+            dish_instructions: dishData?.instructions || null,
+            dish_cooking_time: dishData?.cooking_time || null,
+          };
+        }),
       };
     })
   );
@@ -105,16 +119,22 @@ export async function getOrderById(id: string): Promise<OrderWithItems | null> {
 
   const { data: items } = await supabase
     .from("order_items")
-    .select("*, dishes(name, image_url)")
+    .select("*, dishes(name, image_url, ingredients, instructions, cooking_time)")
     .eq("order_id", id);
 
   return {
     ...order,
-    items: (items || []).map((item) => ({
-      ...item,
-      dish_name: (item as unknown as { dishes: { name: string; image_url: string | null } } | null)?.dishes?.name || "Unknown",
-      dish_image_url: (item as unknown as { dishes: { name: string; image_url: string | null } } | null)?.dishes?.image_url || null,
-    })),
+    items: (items || []).map((item) => {
+      const dishData = (item as unknown as { dishes: { name: string; image_url: string | null; ingredients: unknown; instructions: string | null; cooking_time: number | null } | null })?.dishes;
+      return {
+        ...item,
+        dish_name: dishData?.name || "Unknown",
+        dish_image_url: dishData?.image_url || null,
+        dish_ingredients: (dishData?.ingredients as { name: string; amount: number; unit: string }[]) || null,
+        dish_instructions: dishData?.instructions || null,
+        dish_cooking_time: dishData?.cooking_time || null,
+      };
+    }),
   };
 }
 

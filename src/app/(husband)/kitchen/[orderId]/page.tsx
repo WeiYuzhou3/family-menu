@@ -100,16 +100,46 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
               </div>
             </div>
 
-            {/* Divider + Ingredients/Instructions if available */}
-            <div className="border-t border-border-subtle p-4">
-              <div className="flex items-center gap-2 text-sm text-text-secondary mb-2">
-                <ChefHat className="w-4 h-4 text-accent" />
-                <span className="font-medium">菜谱参考</span>
+            {/* Ingredients + Instructions */}
+            {(item.dish_ingredients?.length || item.dish_instructions) && (
+              <div className="border-t border-border-subtle p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-text-secondary">
+                  <ChefHat className="w-4 h-4 text-accent" />
+                  <span className="font-medium">菜谱</span>
+                </div>
+
+                {/* Ingredients */}
+                {item.dish_ingredients && item.dish_ingredients.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-text-muted mb-2">📋 食材清单</h4>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {item.dish_ingredients.map((ing, i) => (
+                        <div key={i} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-bg-base text-xs">
+                          <span className="text-text-primary">{ing.name}</span>
+                          <span className="text-text-muted font-mono">{ing.amount}{ing.unit}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Instructions */}
+                {item.dish_instructions && (
+                  <div>
+                    <h4 className="text-xs font-medium text-text-muted mb-2">📝 烹饪步骤</h4>
+                    <div
+                      className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap bg-bg-base rounded-lg p-3"
+                      dangerouslySetInnerHTML={{
+                        __html: item.dish_instructions.replace(
+                          /(https?:\/\/\S+)/g,
+                          '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">$1</a>'
+                        ),
+                      }}
+                    />
+                  </div>
+                )}
               </div>
-              <p className="text-sm text-text-muted leading-relaxed">
-                请查看菜品管理中的详细做法和食材清单
-              </p>
-            </div>
+            )}
           </div>
         ))}
       </div>
