@@ -18,7 +18,7 @@ function getWeekDates() {
   const today = new Date();
   const dayOfWeek = today.getDay();
   const dates: { date: string; label: string }[] = [];
-  for (let i = 0; i < 7 - dayOfWeek; i++) {
+  for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const dateStr = d.toISOString().split("T")[0];

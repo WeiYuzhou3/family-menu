@@ -24,9 +24,9 @@ function getWeekDates(): { date: string; label: string; isToday: boolean }[] {
   const todayStr = today.toISOString().split("T")[0];
   const dayOfWeek = today.getDay(); // 0=Sun
 
-  // Generate from today to Sunday
+  // Generate 7 days from today
   const dates = [];
-  for (let i = 0; i < 7 - dayOfWeek; i++) {
+  for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const dateStr = d.toISOString().split("T")[0];
