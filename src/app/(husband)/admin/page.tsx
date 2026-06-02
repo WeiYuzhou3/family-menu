@@ -38,6 +38,9 @@ export default async function AdminPage() {
         </div>
       </div>
 
+      {/* Weekly Suggestions (collapsible at top) */}
+      {dishes.length > 0 && <WeeklySuggestions />}
+
       {/* Dish List */}
       {dishes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -131,8 +134,6 @@ export default async function AdminPage() {
           ))}
         </div>
       )}
-
-      {dishes.length > 0 && <WeeklySuggestions />}
     </div>
   );
 }

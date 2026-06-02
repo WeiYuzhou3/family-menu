@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Lightbulb, RefreshCw, Loader2, ExternalLink } from "lucide-react";
 
@@ -19,6 +19,7 @@ export function WeeklySuggestions() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   async function fetchSuggestions() {
     setLoading(true);
@@ -57,23 +58,30 @@ export function WeeklySuggestions() {
 
       {!loaded && !loading && (
         <button
-          onClick={fetchSuggestions}
-          className="w-full py-10 rounded-xl border-2 border-dashed border-border-subtle text-text-muted hover:border-accent/30 hover:text-accent transition-colors text-sm"
+          onClick={() => { fetchSuggestions(); setExpanded(true); }}
+          className="w-full py-3 rounded-xl border border-dashed border-wood/30 bg-wood/5 text-wood-dark hover:bg-wood/10 transition-colors text-sm flex items-center justify-center gap-2"
         >
-          <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <Lightbulb className="w-4 h-4" />
           点击查看 AI 推荐的新菜品
         </button>
       )}
 
       {loading && (
-        <div className="flex items-center justify-center py-10 text-text-muted text-sm">
-          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+        <div className="flex items-center justify-center py-4 text-text-muted text-sm">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
           AI 思考中...
         </div>
       )}
 
       {suggestions.length > 0 && (
         <div className="space-y-2">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full text-xs text-text-muted hover:text-text-secondary transition-colors py-1"
+          >
+            {expanded ? "收起 ▲" : `展开 ${suggestions.length} 道推荐菜 ▼`}
+          </button>
+          {expanded && (<div className="space-y-2">
           {suggestions.map((s, i) => (
             <div key={i} className="flex items-start gap-3 p-3 bg-bg-surface border border-border-subtle rounded-xl">
               <span className="text-2xl shrink-0">🍳</span>
@@ -97,6 +105,8 @@ export function WeeklySuggestions() {
               </Link>
             </div>
           ))}
+        </div>
+          )}
         </div>
       )}
     </div>
