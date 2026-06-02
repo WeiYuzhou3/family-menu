@@ -78,10 +78,11 @@ export function MenuClient({ dishes }: MenuClientProps) {
       {filteredDishes.length === 0 ? (
         <EmptyState title="暂无菜品" description="此分类下还没有菜品" />
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {filteredDishes.map((dish) => (
+        <div className="grid grid-cols-2 gap-3 stagger">
+          {filteredDishes.map((dish, i) => (
+            <div key={dish.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 0.06}s` }}>
             <Link key={dish.id} href={`/menu/${dish.id}`}>
-              <div className="group rounded-xl overflow-hidden bg-bg-surface border border-border-subtle hover:border-border-default transition-all duration-200 hover:scale-[1.02] hover:shadow-elevated">
+              <div className="group rounded-xl overflow-hidden bg-white border border-border-subtle card-hover">
                 <div className="relative aspect-square overflow-hidden">
                   {dish.image_url ? (
                     <Image

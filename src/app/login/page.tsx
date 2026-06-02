@@ -36,11 +36,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "linear-gradient(180deg, #faf7f2 0%, #f0ebe0 100%)" }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "linear-gradient(135deg, #faf7f2 0%, #f0ebe0 50%, #f5efe5 100%)" }}>
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white border border-border-subtle mb-4 shadow-card">
+        <div className="text-center mb-10 animate-fade-in-up">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white border border-border-subtle mb-4 shadow-card" style={{ animation: "float 3s ease-in-out infinite" }}>
             <span className="text-4xl">🍳</span>
           </div>
           <h1 className="text-3xl text-text-primary tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>
@@ -50,7 +50,7 @@ export default function LoginPage() {
         </div>
 
         {/* Role Toggle */}
-        <div className="mb-6">
+        <div className="mb-6 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex bg-bg-surface rounded-xl p-1.5 border border-border-subtle">
             {(["wife", "husband"] as const).map((r) => (
               <button
@@ -74,7 +74,7 @@ export default function LoginPage() {
         </div>
 
         {/* Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           <div className="relative">
             <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
             <input
@@ -104,8 +104,8 @@ export default function LoginPage() {
             disabled={loading || !password}
             className={cn(
               "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-sm",
-              "bg-accent text-white transition-all duration-200",
-              "hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed",
+              "bg-accent text-white transition-all duration-200 btn-press",
+              "hover:bg-accent-hover hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed",
               "shadow-sm"
             )}
           >

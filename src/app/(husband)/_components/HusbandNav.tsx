@@ -15,7 +15,7 @@ export function HusbandNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-bg-surface/95 backdrop-blur-xl border-t border-border-subtle">
+    <nav className="fixed bottom-0 inset-x-0 z-50 glass border-t border-border-subtle">
       <div className="max-w-lg mx-auto flex items-center justify-around h-16 px-4">
         {NAV_ITEMS.map((item) => {
           const isActive =
