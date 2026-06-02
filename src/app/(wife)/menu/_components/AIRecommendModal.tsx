@@ -79,9 +79,19 @@ export function AIRecommendModal({ open, onClose, mealDate, mealTime }: AIRecomm
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-md max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl p-6 shadow-elevated">
+    <div className="fixed inset-0 z-[100]" style={{ display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} onClick={onClose} />
+      <div style={{
+        position: "relative",
+        width: "100%",
+        maxWidth: 420,
+        maxHeight: "85vh",
+        overflow: "auto",
+        background: "#fff",
+        borderRadius: "16px 16px 0 0",
+        padding: 24,
+        boxShadow: "0 -4px 20px rgba(0,0,0,0.1)",
+      }}>
         <button onClick={onClose} className="absolute top-4 right-4 p-1 text-text-muted hover:text-text-primary">
           <X className="w-5 h-5" />
         </button>
