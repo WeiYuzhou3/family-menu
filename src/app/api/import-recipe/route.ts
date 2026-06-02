@@ -78,10 +78,13 @@ const SYSTEM_PROMPT = `你是一个专业的家庭烹饪助手。用户会给你
   "instructions": "详细的烹饪步骤，用编号列出，每步占一行"
 }
 
-注意：
-- 如果视频信息不足以确定食材用量，请根据经验合理推断
-- instructions 要详细，能让人照着做
-- 食材单位用中文（克、个、勺、适量等）`;
+⚠️ 重要格式要求：
+- amount 必须是数字，不能加引号，例如 "amount": 200（正确），"amount": "200"（错误）
+- cooking_time 必须是数字，不能加引号
+- 所有字符串必须用双引号，不能有换行
+- 不要在JSON外面加任何解释文字
+- 确保JSON完全符合标准格式，没有多余的逗号或引号`;
+
 
 async function callDeepSeek(text: string): Promise<RecipeOutput> {
   const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -120,10 +123,16 @@ async function callDeepSeek(text: string): Promise<RecipeOutput> {
   }
 
   // Parse JSON from response (might have markdown code blocks)
-  const cleaned = content
+  let cleaned = content
     .replace(/```json\s*/g, "")
     .replace(/```\s*/g, "")
     .trim();
+
+  // Fix common AI JSON mistakes: "amount": 1" → "amount": 1
+  cleaned = cleaned.replace(/"amount":\s*(\d+)"(\s*[,}\]])/g, '"amount": $1$2');
+  cleaned = cleaned.replace(/"cooking_time":\s*(\d+)"(\s*[,}\]])/g, '"cooking_time": $1$2');
+  // Fix trailing comma before } or ]
+  cleaned = cleaned.replace(/,(\s*[}\]])/g, "$1");
 
   try {
     const recipe = JSON.parse(cleaned) as RecipeOutput;
