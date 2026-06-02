@@ -3,6 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createDish, updateDish, deleteDish, type CreateDishInput, type UpdateDishInput } from "@/lib/db/dishes";
+
+export async function createDishWithoutRedirect(input: CreateDishInput): Promise<{ success: boolean; error?: string }> {
+  try {
+    await createDish(input);
+    revalidatePath("/admin");
+    revalidatePath("/menu");
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "保存失败" };
+  }
+}
 import type { Category, Difficulty } from "@/lib/supabase/types";
 
 export async function createDishAction(formData: FormData) {

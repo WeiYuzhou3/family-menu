@@ -90,23 +90,9 @@ export default function ImportRecipePage() {
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.set("name", recipe.name);
-      formData.set("category", recipe.category);
-      formData.set("description", recipe.description);
-      formData.set("instructions", recipe.instructions);
-      formData.set("cooking_time", String(recipe.cooking_time || ""));
-      formData.set("difficulty", recipe.difficulty);
-      formData.set("ingredients", JSON.stringify(recipe.ingredients));
-      if (coverUrl) formData.set("image_url", coverUrl);
-      // Attach video URL to instructions so husband can watch while cooking
-      if (videoUrl) {
-        formData.set("instructions", `📺 参考视频：${videoUrl}\n\n${recipe.instructions}`);
-      }
-
-      // Use the underlying createDish directly (without redirect)
-      const { createDish } = await import("@/lib/db/dishes");
-      await createDish({
+      // Use server action so it runs on the server with env access
+      const { createDishWithoutRedirect } = await import("../actions");
+      const result = await createDishWithoutRedirect({
         name: recipe.name,
         category: recipe.category as "main" | "side" | "soup" | "breakfast" | "dessert" | "beverage",
         description: recipe.description,
@@ -118,6 +104,7 @@ export default function ImportRecipePage() {
         cooking_time: recipe.cooking_time,
         difficulty: recipe.difficulty as "easy" | "medium" | "hard" | undefined,
       });
+      if (!result.success) throw new Error(result.error);
       setSavedDishes((prev) => new Set(prev).add(index));
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存失败");
