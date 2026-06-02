@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       .eq("is_available", true);
 
     if (!dishes?.length) {
-      return NextResponse.json({ error: "菜单里还没有菜品哦，让老公先添加一些吧" }, { status: 400 });
+      return NextResponse.json({ error: "菜单里还没有菜品哦，让大厨先添加一些吧" }, { status: 400 });
     }
 
     // Get recent orders (last 7 days) to avoid repeats
@@ -68,19 +68,19 @@ export async function POST(request: NextRequest) {
       breakfast: "早餐", lunch: "午餐", dinner: "晚餐",
     };
 
-    const prompt = `你是家庭营养搭配师。老婆今天要吃${mealNames[mealTime] || mealTime}，偏好：${preference || "无特别偏好，请自由搭配"}。
+    const prompt = `你是家庭营养搭配师。吃货今天要吃${mealNames[mealTime] || mealTime}，偏好：${preference || "无特别偏好，请自由搭配"}。
 
 请从以下菜品中挑选2-3道，注意：
 1. 营养均衡搭配（荤素、口味不冲突）
 2. 如果标注了【近7天已吃过】，尽量不要选
 3. 不同category搭配合理（比如有主食也要有配菜或汤）
-4. 用温柔关心的语气，给老婆一句暖心的搭配说明
+4. 用温柔关心的语气，给吃货一句暖心的搭配说明
 
 可用菜品：
 ${dishText}
 
 请严格返回JSON（不要markdown）：
-{"dishes": [{"id": "菜品id", "name": "菜名", "reason": "选择理由，一句话"}], "message": "给老婆的暖心关怀语，一两句话"}
+{"dishes": [{"id": "菜品id", "name": "菜名", "reason": "选择理由，一句话"}], "message": "给吃货的暖心关怀语，一两句话"}
 
 菜品id必须从上面的列表中选择，不要编造。`;
 

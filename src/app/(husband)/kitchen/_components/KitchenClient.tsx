@@ -122,7 +122,7 @@ export function KitchenClient({ activeOrders, completedOrders }: KitchenClientPr
         <EmptyState
           icon={CookingPot}
           title="暂无订单"
-          description={selectedDate === today ? "等待老婆下单中..." : "这一天还没有预约"}
+          description={selectedDate === today ? "等待吃货下单中..." : "这一天还没有预约"}
         />
       )}
 

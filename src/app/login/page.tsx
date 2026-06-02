@@ -67,7 +67,7 @@ export default function LoginPage() {
                     : "text-text-secondary hover:text-text-primary"
                 )}
               >
-                {r === "wife" ? "👩 老婆" : "👨‍🍳 老公"}
+                {r === "wife" ? "😋 吃货" : "👨‍🍳 大厨"}
               </button>
             ))}
           </div>

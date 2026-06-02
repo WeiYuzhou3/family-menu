@@ -71,7 +71,7 @@ export default function CartPage() {
           <Send className="w-10 h-10 text-accent" />
         </div>
         <h1 className="font-serif text-2xl text-text-primary mb-2">下单成功！</h1>
-        <p className="text-text-secondary mb-8">老公已经开始准备做饭啦</p>
+        <p className="text-text-secondary mb-8">大厨已经开始准备做饭啦</p>
         <div className="flex gap-3 justify-center">
           <Button variant="secondary" onClick={() => router.push("/menu")}>
             继续点单
