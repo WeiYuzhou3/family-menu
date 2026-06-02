@@ -36,6 +36,7 @@ export default function ImportRecipePage() {
   const [recipes, setRecipes] = useState<RecipePreview[]>([]);
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   const isBili = isBilibili(url);
   const inputStyle = {
@@ -75,6 +76,7 @@ export default function ImportRecipePage() {
       if (!res.ok) throw new Error(data.error || "生成失败");
       setRecipes(data.recipes || []);
       setCoverUrl(data.coverUrl || null);
+      setVideoUrl(cleanUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败，请重试");
     } finally {
@@ -96,6 +98,10 @@ export default function ImportRecipePage() {
       formData.set("difficulty", recipe.difficulty);
       formData.set("ingredients", JSON.stringify(recipe.ingredients));
       if (coverUrl) formData.set("image_url", coverUrl);
+      // Attach video URL to instructions so husband can watch while cooking
+      if (videoUrl) {
+        formData.set("instructions", `📺 参考视频：${videoUrl}\n\n${recipe.instructions}`);
+      }
 
       const { createDishAction } = await import("../actions");
       await createDishAction(formData);

@@ -106,7 +106,14 @@ export default async function DishDetailPage({ params }: DishDetailPageProps) {
             <h2 className="font-serif text-lg text-text-primary mb-3">烹饪做法</h2>
             <div className="bg-bg-surface border border-border-subtle rounded-xl p-4">
               <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
-                {dish.instructions}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: dish.instructions.replace(
+                      /(https?:\/\/\S+)/g,
+                      '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline">$1</a>'
+                    ),
+                  }}
+                />
               </div>
             </div>
           </section>
