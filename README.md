@@ -10,11 +10,14 @@
 - 📅 **周菜单预约** — 选择日期（今天 ~ 周日）+ 餐次（早/中/晚餐），按需点菜
 - 🛒 **购物车** — 支持多菜品、多数量、特殊备注
 - 📋 **订单管理** — 按日期和餐次查看进行中 & 已完成订单
+- 🤖 **AI 智能推荐** — 选口味偏好，AI 从已有菜品中搭配 2-3 道，附暖心关怀语
 
 ### 老公端
 - 🧑‍🍳 **厨房看板** — 按日期切换，早中晚三餐订单分组展示
-- 📖 **订单详情** — 查看菜品清单、特殊需求、状态流转
+- 📖 **订单详情** — 查看菜品清单、特殊需求、状态流转、视频链接
 - ⚙️ **菜品管理** — 新增/编辑/删除菜品，图片上传，食材编辑器
+- 🔗 **AI 视频导入** — 粘贴 B站/小红书/抖音链接，自动生成菜谱（名称、食材、做法）
+- 💡 **本周新菜推荐** — AI 根据已有菜品推荐家常下饭菜，一键搜视频
 
 ### 通用
 - 🔐 **角色登录** — 老婆/老公各自密码进入对应界面
@@ -35,8 +38,12 @@ family-menu/
 │   │   │   └── orders/         # 购物车 + 订单列表
 │   │   ├── (husband)/          # 老公端路由组
 │   │   │   ├── kitchen/        # 厨房看板 + 订单详情
-│   │   │   └── admin/          # 菜品管理 CRUD
-│   │   ├── api/upload/         # 图片上传 API
+│   │   │   └── admin/          # 菜品管理 + AI 导入
+│   │   ├── api/
+│   │   │   ├── upload/         # 图片上传
+│   │   │   ├── import-recipe/  # AI 视频转菜谱
+│   │   │   ├── ai-recommend/   # AI 每日推荐
+│   │   │   └── ai-suggest-new/ # AI 新菜建议
 │   │   └── manifest.ts + sw.ts # PWA 配置
 │   ├── components/
 │   │   ├── ui/                 # 通用 UI 组件库
@@ -66,6 +73,7 @@ family-menu/
 | 样式 | Tailwind CSS | 4.x |
 | 数据库 | Supabase (PostgreSQL) | - |
 | 图片存储 | Supabase Storage | - |
+| AI 服务 | DeepSeek API | - |
 | 认证 | iron-session + bcryptjs | 8.x / 3.x |
 | PWA | Serwist | 9.x |
 | 图标 | Lucide React | - |
@@ -105,6 +113,7 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=https://你的项目.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=你的anon密钥
 SUPABASE_SERVICE_ROLE_KEY=你的service_role密钥
+DEEPSEEK_API_KEY=sk-你的DeepSeek密钥
 COOKIE_SECRET=一个至少32位的随机字符串
 ```
 
