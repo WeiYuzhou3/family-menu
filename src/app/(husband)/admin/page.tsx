@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Pencil, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Eye, EyeOff, Sparkles } from "lucide-react";
 import { getAllDishes } from "@/lib/db/dishes";
 import { toggleAvailablityAction } from "./actions";
 import { DeleteButton } from "./_components/DeleteButton";
@@ -19,13 +19,22 @@ export default async function AdminPage() {
           </h1>
           <p className="text-sm text-text-muted mt-1">{dishes.length} 道菜品</p>
         </div>
-        <Link
-          href="/admin/new"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium bg-accent text-black hover:bg-accent-hover transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          新增
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/import"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium bg-wood/20 text-wood-dark border border-wood/30 hover:bg-wood/30 transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            AI 导入
+          </Link>
+          <Link
+            href="/admin/new"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            新增
+          </Link>
+        </div>
       </div>
 
       {/* Dish List */}
