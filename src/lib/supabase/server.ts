@@ -1,0 +1,20 @@
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./types";
+
+// Server-side Supabase client – uses SERVICE_ROLE key.
+// Never exposed to the client. Use in Server Components & Server Actions only.
+export function createServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      "Missing Supabase environment variables. Check .env.local for NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return createClient<any>(url, key, {
+    auth: { persistSession: false },
+  });
+}
