@@ -184,7 +184,14 @@ export default function ImportRecipePage() {
           {coverUrl && (
             <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-bg-base">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={coverUrl} alt={recipe.name} className="w-full h-full object-cover" />
+              <img
+                src={coverUrl}
+                alt={recipe.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
             </div>
           )}
 

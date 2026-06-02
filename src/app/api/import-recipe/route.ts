@@ -52,9 +52,14 @@ async function fetchBilibiliInfo(id: string): Promise<BilibiliInfo> {
 
   const { title, desc, dynamic, pic } = json.data;
   const parts = [title, desc, dynamic].filter(Boolean);
+  // Upgrade HTTP to HTTPS
+  let cover = pic || null;
+  if (cover && cover.startsWith("http://")) {
+    cover = cover.replace("http://", "https://");
+  }
   return {
     text: parts.join("\n\n"),
-    coverUrl: pic || null,
+    coverUrl: cover,
   };
 }
 
