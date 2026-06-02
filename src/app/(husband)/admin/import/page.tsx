@@ -33,8 +33,8 @@ export default function ImportRecipePage() {
   const [manualText, setManualText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [recipe, setRecipe] = useState<RecipePreview | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [recipes, setRecipes] = useState<RecipePreview[]>([]);
+  const [savingIndex, setSavingIndex] = useState<number | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
 
   const isBili = isBilibili(url);
@@ -54,7 +54,7 @@ export default function ImportRecipePage() {
       return;
     }
     setError("");
-    setRecipe(null);
+    setRecipes([]);
     setLoading(true);
 
     try {
@@ -73,7 +73,7 @@ export default function ImportRecipePage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "生成失败");
-      setRecipe(data.recipe);
+      setRecipes(data.recipes || []);
       setCoverUrl(data.coverUrl || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败，请重试");
@@ -82,9 +82,8 @@ export default function ImportRecipePage() {
     }
   }
 
-  async function handleSave() {
-    if (!recipe) return;
-    setSaving(true);
+  async function handleSave(recipe: RecipePreview, index: number) {
+    setSavingIndex(index);
     setError("");
 
     try {
@@ -102,7 +101,7 @@ export default function ImportRecipePage() {
       await createDishAction(formData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存失败");
-      setSaving(false);
+      setSavingIndex(null);
     }
   }
 
@@ -178,11 +177,13 @@ export default function ImportRecipePage() {
         </button>
       </div>
 
-      {recipe && (
-        <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4">
+      {recipes.length > 0 && (
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Check className="w-5 h-5 text-accent" />
-            <h2 className="text-lg text-text-primary" style={{ fontFamily: "var(--font-serif)" }}>生成结果预览</h2>
+            <h2 className="text-lg text-text-primary" style={{ fontFamily: "var(--font-serif)" }}>
+              生成结果 · {recipes.length} 道菜
+            </h2>
           </div>
 
           {coverUrl && (
@@ -190,60 +191,65 @@ export default function ImportRecipePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={coverUrl}
-                alt={recipe.name}
+                alt="封面"
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
             </div>
           )}
 
-          <div>
-            <h3 className="text-xl font-medium text-text-primary">{recipe.name}</h3>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent">
-                {CATEGORY_LABELS[recipe.category] || recipe.category}
-              </span>
-              {recipe.cooking_time > 0 && <span className="text-xs text-text-muted">⏱ {recipe.cooking_time}分钟</span>}
-              {recipe.difficulty && <span className="text-xs text-text-muted">{DIFFICULTY_LABELS[recipe.difficulty] || recipe.difficulty}</span>}
-            </div>
-            {recipe.description && <p className="text-sm text-text-secondary mt-2">{recipe.description}</p>}
-          </div>
-
-          {recipe.ingredients.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-text-secondary mb-2">📋 食材清单</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {recipe.ingredients.map((ing, i) => (
-                  <div key={i} className="flex justify-between px-3 py-1.5 rounded-lg bg-bg-base text-sm">
-                    <span>{ing.name}</span>
-                    <span className="text-text-muted">{ing.amount} {ing.unit}</span>
-                  </div>
-                ))}
+          {recipes.map((recipe, index) => (
+            <div key={index} className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-text-primary">
+                  <span className="text-text-muted text-sm mr-2">#{index + 1}</span>
+                  {recipe.name}
+                </h3>
               </div>
-            </div>
-          )}
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent">
+                  {CATEGORY_LABELS[recipe.category] || recipe.category}
+                </span>
+                {recipe.cooking_time > 0 && <span className="text-xs text-text-muted">⏱ {recipe.cooking_time}分钟</span>}
+                {recipe.difficulty && <span className="text-xs text-text-muted">{DIFFICULTY_LABELS[recipe.difficulty] || recipe.difficulty}</span>}
+              </div>
+              {recipe.description && <p className="text-sm text-text-secondary">{recipe.description}</p>}
 
-          <div>
-            <h4 className="text-sm font-medium text-text-secondary mb-2">📝 烹饪做法</h4>
-            <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap bg-bg-base rounded-lg p-3">
-              {recipe.instructions}
-            </div>
-          </div>
+              {recipe.ingredients.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-text-secondary mb-2">📋 食材</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {recipe.ingredients.map((ing, i) => (
+                      <div key={i} className="flex justify-between px-3 py-1.5 rounded-lg bg-bg-base text-sm">
+                        <span>{ing.name}</span>
+                        <span className="text-text-muted">{ing.amount} {ing.unit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-sm bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40"
-          >
-            {saving ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <Save className="w-5 h-5" />
-            )}
-            保存到菜单
-          </button>
+              <div>
+                <h4 className="text-sm font-medium text-text-secondary mb-2">📝 做法</h4>
+                <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap bg-bg-base rounded-lg p-3">
+                  {recipe.instructions}
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleSave(recipe, index)}
+                disabled={savingIndex !== null}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40"
+              >
+                {savingIndex === index ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                保存「{recipe.name}」到菜单
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

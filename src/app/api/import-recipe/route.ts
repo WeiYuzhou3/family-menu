@@ -12,6 +12,8 @@ interface RecipeOutput {
   instructions: string;
 }
 
+type RecipeListOutput = RecipeOutput[];
+
 // ── B站 API ──
 
 function extractUrl(text: string): string | null {
@@ -98,31 +100,34 @@ async function fetchBilibiliInfo(id: string): Promise<BilibiliInfo> {
 
 const DEEPSEEK_API = "https://api.deepseek.com/chat/completions";
 
-const SYSTEM_PROMPT = `你是一个专业的家庭烹饪助手。用户会给你一段做菜视频的描述文字，请你从中提取或推断出一份完整的菜谱。
+const SYSTEM_PROMPT = `你是一个专业的家庭烹饪助手。用户会给你一段做菜视频的描述文字，请你从中提取所有出现的菜品，为每道菜生成完整菜谱。
 
-请严格按照以下JSON格式返回（不要包含markdown代码块标记）：
+如果视频中只做了一道菜，返回包含一个对象的数组；如果有多道菜，每个菜一个对象。
 
-{
-  "name": "菜名",
-  "description": "简短诱人的菜品简介（一句话）",
-  "category": "main/side/soup/breakfast/dessert/beverage 之一",
-  "cooking_time": 烹饪时间（分钟，整数）,
-  "difficulty": "easy/medium/hard 之一",
-  "ingredients": [
-    {"name": "食材名称", "amount": 数量, "unit": "单位"}
-  ],
-  "instructions": "详细的烹饪步骤，用编号列出，每步占一行"
-}
+请严格按照以下JSON数组格式返回（不要包含markdown代码块标记）：
+
+[
+  {
+    "name": "菜名",
+    "description": "简短诱人的菜品简介（一句话）",
+    "category": "main/side/soup/breakfast/dessert/beverage 之一",
+    "cooking_time": 烹饪时间（分钟，整数）,
+    "difficulty": "easy/medium/hard 之一",
+    "ingredients": [
+      {"name": "食材名称", "amount": 数量, "unit": "单位"}
+    ],
+    "instructions": "详细的烹饪步骤，用编号列出，每步占一行"
+  }
+]
 
 ⚠️ 重要格式要求：
-- amount 必须是数字，不能加引号，例如 "amount": 200（正确），"amount": "200"（错误）
-- cooking_time 必须是数字，不能加引号
-- 所有字符串必须用双引号，不能有换行
-- 不要在JSON外面加任何解释文字
-- 确保JSON完全符合标准格式，没有多余的逗号或引号`;
+- amount 和 cooking_time 必须是数字，不能加引号
+- 所有字符串必须用双引号
+- 返回必须是有效的JSON数组
+- 不要在JSON外面加任何解释文字`;
 
 
-async function callDeepSeek(text: string): Promise<RecipeOutput> {
+async function callDeepSeek(text: string): Promise<RecipeOutput[]> {
   const apiKey = process.env.DEEPSEEK_API_KEY;
 
   if (!apiKey) {
@@ -171,12 +176,16 @@ async function callDeepSeek(text: string): Promise<RecipeOutput> {
   cleaned = cleaned.replace(/,(\s*[}\]])/g, "$1");
 
   try {
-    const recipe = JSON.parse(cleaned) as RecipeOutput;
-    // Basic validation
-    if (!recipe.name || !recipe.instructions) {
-      throw new Error("AI 生成的菜谱缺少必要字段");
+    const parsed = JSON.parse(cleaned);
+    // Accept both single object and array
+    const recipes: RecipeOutput[] = Array.isArray(parsed) ? parsed : [parsed];
+
+    for (const r of recipes) {
+      if (!r.name || !r.instructions) {
+        throw new Error("AI 生成的菜谱缺少必要字段（name/instructions）");
+      }
     }
-    return recipe;
+    return recipes;
   } catch (err) {
     throw new Error(`AI 返回格式解析失败: ${(err as Error).message}\n\n原始内容: ${content.slice(0, 300)}`);
   }
@@ -231,9 +240,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const recipe = await callDeepSeek(contentText);
+    const recipes = await callDeepSeek(contentText);
 
-    return NextResponse.json({ recipe, coverUrl });
+    return NextResponse.json({ recipes, coverUrl });
   } catch (err) {
     const message = err instanceof Error ? err.message : "未知错误";
     console.error("import-recipe error:", message);
