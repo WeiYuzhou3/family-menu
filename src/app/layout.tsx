@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
-import { KittyCorner } from "@/components/KittyCorner";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -51,7 +50,6 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-bg-base text-text-primary font-sans">
         <ToastProvider>
-          <KittyCorner />
           {children}
         </ToastProvider>
       </body>
