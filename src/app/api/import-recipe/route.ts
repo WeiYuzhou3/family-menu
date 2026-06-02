@@ -14,15 +14,25 @@ interface RecipeOutput {
 
 // ── B站 API ──
 
+function extractUrl(text: string): string | null {
+  // Try to extract URL from text that might contain Chinese characters
+  const urlMatch = text.match(/(https?:\/\/[^\s]{5,})/i);
+  return urlMatch ? urlMatch[1] : text.trim();
+}
+
 function extractBilibiliId(url: string): string | null {
+  // First extract clean URL from possibly mixed text
+  const cleanUrl = extractUrl(url);
+  if (!cleanUrl) return null;
+
   // BV号格式
-  const bvMatch = url.match(/BV[a-zA-Z0-9]{10}/);
+  const bvMatch = cleanUrl.match(/BV[a-zA-Z0-9]{10}/);
   if (bvMatch) return bvMatch[0];
   // av号格式
-  const avMatch = url.match(/av(\d+)/i);
+  const avMatch = cleanUrl.match(/av(\d+)/i);
   if (avMatch) return `av${avMatch[1]}`;
   // b23.tv 短链接
-  if (/b23\.tv/i.test(url)) return "__short__";
+  if (/b23\.tv/i.test(cleanUrl)) return "__short__";
   return null;
 }
 
@@ -180,13 +190,16 @@ export async function POST(request: NextRequest) {
     let contentText = manualText || "";
     let coverUrl: string | null = null;
 
+    // Clean URL (extract from mixed text like "【标题】 https://b23.tv/xxx")
+    const cleanUrl = url ? extractUrl(url) : null;
+
     // Try B站 auto-fetch
-    if (url) {
-      let bvid = extractBilibiliId(url);
+    if (cleanUrl) {
+      let bvid = extractBilibiliId(cleanUrl);
       // Resolve b23.tv short links
       if (bvid === "__short__") {
         try {
-          bvid = await resolveB23ShortLink(url);
+          bvid = await resolveB23ShortLink(cleanUrl);
         } catch (err) {
           console.error("短链接解析失败:", err);
           bvid = null;
