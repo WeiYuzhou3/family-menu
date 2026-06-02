@@ -24,7 +24,12 @@ function extractBilibiliId(url: string): string | null {
   return null;
 }
 
-async function fetchBilibiliInfo(id: string): Promise<string> {
+interface BilibiliInfo {
+  text: string;
+  coverUrl: string | null;
+}
+
+async function fetchBilibiliInfo(id: string): Promise<BilibiliInfo> {
   const isAv = id.startsWith("av");
   const param = isAv ? `aid=${id.slice(2)}` : `bvid=${id}`;
   const apiUrl = `https://api.bilibili.com/x/web-interface/view?${param}`;
@@ -45,9 +50,12 @@ async function fetchBilibiliInfo(id: string): Promise<string> {
     throw new Error(`B站 API 返回错误: ${json.message}`);
   }
 
-  const { title, desc, dynamic } = json.data;
+  const { title, desc, dynamic, pic } = json.data;
   const parts = [title, desc, dynamic].filter(Boolean);
-  return parts.join("\n\n");
+  return {
+    text: parts.join("\n\n"),
+    coverUrl: pic || null,
+  };
 }
 
 // ── DeepSeek API ──
@@ -137,14 +145,16 @@ export async function POST(request: NextRequest) {
     const { url, manualText } = body as { url?: string; manualText?: string };
 
     let contentText = manualText || "";
+    let coverUrl: string | null = null;
 
     // Try B站 auto-fetch
     if (url) {
       const bvid = extractBilibiliId(url);
       if (bvid) {
         try {
-          const biliText = await fetchBilibiliInfo(bvid);
-          contentText = biliText + (contentText ? "\n\n用户补充:\n" + contentText : "");
+          const biliInfo = await fetchBilibiliInfo(bvid);
+          contentText = biliInfo.text + (contentText ? "\n\n用户补充:\n" + contentText : "");
+          coverUrl = biliInfo.coverUrl;
         } catch (err) {
           console.error("B站抓取失败:", err);
           if (!contentText) {
@@ -166,7 +176,7 @@ export async function POST(request: NextRequest) {
 
     const recipe = await callDeepSeek(contentText);
 
-    return NextResponse.json({ recipe });
+    return NextResponse.json({ recipe, coverUrl });
   } catch (err) {
     const message = err instanceof Error ? err.message : "未知错误";
     console.error("import-recipe error:", message);

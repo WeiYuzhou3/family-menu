@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, ArrowLeft, Loader2, Check, Save, Link2, FileText } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
+import { Sparkles, ArrowLeft, Check, Save } from "lucide-react";
 import type { Ingredient } from "@/lib/supabase/types";
 
 interface RecipePreview {
@@ -38,9 +35,18 @@ export default function ImportRecipePage() {
   const [error, setError] = useState("");
   const [recipe, setRecipe] = useState<RecipePreview | null>(null);
   const [saving, setSaving] = useState(false);
-  const [showManual, setShowManual] = useState(false);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
 
   const isBili = isBilibili(url);
+  const inputStyle = {
+    width: "100%" as const,
+    padding: "0.75rem 1rem",
+    background: "var(--bg-surface)",
+    border: "1px solid var(--border-subtle)",
+    borderRadius: "0.75rem",
+    color: "var(--text-primary)",
+    outline: "none",
+  };
 
   async function handleGenerate() {
     if (!url.trim() && !manualText.trim()) {
@@ -64,6 +70,7 @@ export default function ImportRecipePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "生成失败");
       setRecipe(data.recipe);
+      setCoverUrl(data.coverUrl || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败，请重试");
     } finally {
@@ -74,6 +81,7 @@ export default function ImportRecipePage() {
   async function handleSave() {
     if (!recipe) return;
     setSaving(true);
+    setError("");
 
     try {
       const formData = new FormData();
@@ -84,8 +92,8 @@ export default function ImportRecipePage() {
       formData.set("cooking_time", String(recipe.cooking_time || ""));
       formData.set("difficulty", recipe.difficulty);
       formData.set("ingredients", JSON.stringify(recipe.ingredients));
+      if (coverUrl) formData.set("image_url", coverUrl);
 
-      // Call the existing createDishAction
       const { createDishAction } = await import("../actions");
       await createDishAction(formData);
     } catch (err) {
@@ -96,7 +104,6 @@ export default function ImportRecipePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => router.back()}
@@ -112,17 +119,15 @@ export default function ImportRecipePage() {
         </div>
       </div>
 
-      {/* Input */}
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1.5">
-            <Link2 className="w-4 h-4 inline mr-1" />
-            视频链接
-          </label>
-          <Input
+          <label className="block text-sm font-medium text-text-secondary mb-1.5">视频链接</label>
+          <input
+            type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="粘贴 B站 / 小红书 / 抖音 视频链接..."
+            style={inputStyle}
           />
           {isBili && url && (
             <p className="text-xs text-accent mt-1.5">✅ 检测到B站链接，将自动获取视频信息</p>
@@ -131,23 +136,16 @@ export default function ImportRecipePage() {
 
         {!isBili && (
           <div>
-            <button
-              type="button"
-              onClick={() => setShowManual(!showManual)}
-              className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-accent transition-colors"
-            >
-              <FileText className="w-4 h-4" />
-              {showManual ? "收起" : "粘贴视频标题和简介文字（小红书/抖音需要）"}
-            </button>
-            {showManual && (
-              <Textarea
-                value={manualText}
-                onChange={(e) => setManualText(e.target.value)}
-                placeholder="把视频的标题、简介、评论区UP主发的食材清单等文字复制到这里..."
-                rows={5}
-                className="mt-2"
-              />
-            )}
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              视频文案（小红书/抖音需手动粘贴）
+            </label>
+            <textarea
+              value={manualText}
+              onChange={(e) => setManualText(e.target.value)}
+              placeholder="把视频的标题、简介、UP主发的食材清单等文字复制到这里..."
+              rows={5}
+              style={{ ...inputStyle, resize: "vertical" as const }}
+            />
           </div>
         )}
 
@@ -157,51 +155,51 @@ export default function ImportRecipePage() {
           </div>
         )}
 
-        <Button
-          size="lg"
-          className="w-full"
+        <button
           onClick={handleGenerate}
-          loading={loading}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-sm bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40"
         >
           {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <>
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              AI 生成中...
+            </>
           ) : (
-            <Sparkles className="w-5 h-5" />
+            <>
+              <Sparkles className="w-5 h-5" />
+              AI 生成菜谱
+            </>
           )}
-          AI 生成菜谱
-        </Button>
+        </button>
       </div>
 
-      {/* Preview */}
       {recipe && (
         <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4">
           <div className="flex items-center gap-2">
             <Check className="w-5 h-5 text-accent" />
-            <h2 className="font-serif text-lg text-text-primary">生成结果预览</h2>
+            <h2 className="text-lg text-text-primary" style={{ fontFamily: "var(--font-serif)" }}>生成结果预览</h2>
           </div>
 
-          {/* Name + Meta */}
+          {coverUrl && (
+            <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-bg-base">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={coverUrl} alt={recipe.name} className="w-full h-full object-cover" />
+            </div>
+          )}
+
           <div>
             <h3 className="text-xl font-medium text-text-primary">{recipe.name}</h3>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent">
                 {CATEGORY_LABELS[recipe.category] || recipe.category}
               </span>
-              {recipe.cooking_time > 0 && (
-                <span className="text-xs text-text-muted">⏱ {recipe.cooking_time}分钟</span>
-              )}
-              {recipe.difficulty && (
-                <span className="text-xs text-text-muted">
-                  {DIFFICULTY_LABELS[recipe.difficulty] || recipe.difficulty}
-                </span>
-              )}
+              {recipe.cooking_time > 0 && <span className="text-xs text-text-muted">⏱ {recipe.cooking_time}分钟</span>}
+              {recipe.difficulty && <span className="text-xs text-text-muted">{DIFFICULTY_LABELS[recipe.difficulty] || recipe.difficulty}</span>}
             </div>
-            {recipe.description && (
-              <p className="text-sm text-text-secondary mt-2">{recipe.description}</p>
-            )}
+            {recipe.description && <p className="text-sm text-text-secondary mt-2">{recipe.description}</p>}
           </div>
 
-          {/* Ingredients */}
           {recipe.ingredients.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-text-secondary mb-2">📋 食材清单</h4>
@@ -216,7 +214,6 @@ export default function ImportRecipePage() {
             </div>
           )}
 
-          {/* Instructions */}
           <div>
             <h4 className="text-sm font-medium text-text-secondary mb-2">📝 烹饪做法</h4>
             <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap bg-bg-base rounded-lg p-3">
@@ -224,11 +221,18 @@ export default function ImportRecipePage() {
             </div>
           </div>
 
-          {/* Save */}
-          <Button size="lg" className="w-full" onClick={handleSave} loading={saving}>
-            <Save className="w-5 h-5" />
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium text-sm bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40"
+          >
+            {saving ? (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Save className="w-5 h-5" />
+            )}
             保存到菜单
-          </Button>
+          </button>
         </div>
       )}
     </div>
