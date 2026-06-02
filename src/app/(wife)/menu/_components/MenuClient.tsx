@@ -117,6 +117,7 @@ export function MenuClient({ dishes }: MenuClientProps) {
                 </div>
               </div>
             </Link>
+            </div>
           ))}
         </div>
       )}
