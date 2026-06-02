@@ -40,6 +40,7 @@ export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
       setError(result.error || "操作失败");
       setLoading(false);
     } else {
+      setLoading(false);
       if (nextStatus === "completed") {
         router.push("/kitchen");
       } else {
